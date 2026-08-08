@@ -133,7 +133,7 @@ export default function Home() {
               <input
                 type="text"
                 placeholder="Search documents..."
-                className="pl-9 pr-4 py-2 text-sm rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 w-56"
+                className="pl-9 pr-4 py-2 text-sm text-slate-900 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 w-56"
               />
             </div>
             <Link href="/chat" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
@@ -158,7 +158,7 @@ export default function Home() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter document title..."
-                className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-5"
+                className="w-full px-3.5 py-2.5 text-sm text-slate-900 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-5"
               />
 
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Choose File</label>
