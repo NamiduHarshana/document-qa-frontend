@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { FileText, Upload, Cloud, Eye, Trash2, MessageSquare, Search, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 
 const API_URL = 'http://127.0.0.1:8000/api/documents/';
@@ -97,14 +98,14 @@ export default function Home() {
         </div>
 
         <nav className="flex-1 px-3 space-y-1">
-          <a href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-50 text-blue-700 font-medium text-sm">
+          <Link href="/" className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-50 text-blue-700 font-medium text-sm">
             <FileText className="w-4 h-4" />
             Documents
-          </a>
-          <a href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-500 hover:bg-slate-50 text-sm">
+          </Link>
+          <Link href="/chat" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-500 hover:bg-slate-50 text-sm">
             <MessageSquare className="w-4 h-4" />
             Chat with Documents
-          </a>
+          </Link>
         </nav>
 
         <div className="px-4 py-4 border-t border-slate-200 flex items-center gap-3">
@@ -135,10 +136,10 @@ export default function Home() {
                 className="pl-9 pr-4 py-2 text-sm rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 w-56"
               />
             </div>
-            <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+            <Link href="/chat" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
               <MessageSquare className="w-4 h-4" />
               Chat with Documents
-            </button>
+            </Link>
           </div>
         </header>
 
