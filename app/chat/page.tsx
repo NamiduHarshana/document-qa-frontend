@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { FileText, MessageSquare, Send, Loader2, Bot, User } from 'lucide-react';
 
-const CHAT_URL = 'http://127.0.0.1:8000/api/chat/';
+const CHAT_URL = 'https://namidu.pythonanywhere.com/api/chat/';
 
 interface Message {
   role: 'user' | 'assistant';

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { FileText, Upload, Cloud, Eye, Trash2, MessageSquare, Search, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 
-const API_URL = 'http://127.0.0.1:8000/api/documents/';
+const API_URL = 'https://namidu.pythonanywhere.com/api/documents/';
 
 interface Document {
   id: number;
