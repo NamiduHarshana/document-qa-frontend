@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { FileText, MessageSquare, Send, Loader2, Bot, User } from 'lucide-react';
+import { getSessionId } from '../utils/session';
 
 const CHAT_URL = 'https://namidu.pythonanywhere.com/api/chat/';
 
@@ -34,7 +35,7 @@ export default function ChatPage() {
     try {
       const res = await fetch(CHAT_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Session-Id': getSessionId() },
         body: JSON.stringify({ question }),
       });
       const data = await res.json();
