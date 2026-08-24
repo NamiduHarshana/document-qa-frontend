@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { FileText, Upload, Cloud, Eye, Trash2, MessageSquare, Search, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { getSessionId } from './utils/session';
 
 const API_URL = 'https://namidu.pythonanywhere.com/api/documents/';
 
@@ -25,11 +26,12 @@ export default function Home() {
 
   const fetchDocuments = useCallback(async () => {
     try {
-      const res = await fetch(API_URL);
+      const res = await fetch(API_URL, {
+        headers: { 'X-Session-Id': getSessionId() },
+      });
       const data = await res.json();
       setDocuments(data);
     } catch {
-      // silently fail — list stays empty, upload panel still usable
     }
   }, []);
 
@@ -46,7 +48,11 @@ export default function Home() {
     formData.append('file', file);
 
     try {
-      const res = await fetch(API_URL, { method: 'POST', body: formData });
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'X-Session-Id': getSessionId() },
+        body: formData,
+      });
       if (!res.ok) throw new Error('Upload failed');
       setStatus('success');
       setTitle('');
@@ -61,10 +67,12 @@ export default function Home() {
 
   const handleDelete = async (id: number) => {
     try {
-      await fetch(`${API_URL}${id}/`, { method: 'DELETE' });
+      await fetch(`${API_URL}${id}/`, {
+        method: 'DELETE',
+        headers: { 'X-Session-Id': getSessionId() },
+      });
       fetchDocuments();
     } catch {
-      // leave list as-is if delete fails
     }
   };
 
@@ -85,7 +93,6 @@ export default function Home() {
 
   return (
     <div className="h-screen bg-slate-50 flex overflow-hidden">
-      {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0">
         <div className="flex items-center gap-2 px-6 py-6">
           <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center">
@@ -119,9 +126,7 @@ export default function Home() {
         </div>
       </aside>
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col">
-        {/* Header */}
         <header className="bg-white border-b border-slate-200 px-8 py-5 flex items-center justify-between gap-6">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Document Q&A Assistant</h1>
@@ -144,7 +149,6 @@ export default function Home() {
         </header>
 
         <main className="flex-1 overflow-y-auto p-8 space-y-6">
-          {/* Upload + status row */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
               <div className="flex items-center gap-2 mb-5">
@@ -197,7 +201,6 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Status panel */}
             <div className="space-y-3">
               {status === 'uploading' && (
                 <div className="flex gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4">
@@ -234,7 +237,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Documents table */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-200">
               <FileText className="w-5 h-5 text-blue-600" />
@@ -243,7 +245,7 @@ export default function Home() {
 
             {documents.length === 0 ? (
               <div className="py-14 text-center text-sm text-slate-400">
-                No documents yet — upload your first one above.
+                No documents yet, upload your first one above.
               </div>
             ) : (
               <table className="w-full text-sm">
@@ -267,7 +269,7 @@ export default function Home() {
                         </div>
                       </td>
                       <td className="py-3.5 px-4 text-slate-500">
-                        {formatDate(doc.uploaded_at)} <span className="text-slate-300">·</span> {formatTime(doc.uploaded_at)}
+                        {formatDate(doc.uploaded_at)} <span className="text-slate-300">.</span> {formatTime(doc.uploaded_at)}
                       </td>
                       <td className="py-3.5 px-4 text-slate-500">{fileType(doc.file)}</td>
                       <td className="py-3.5 px-6">
