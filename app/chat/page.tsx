@@ -6,10 +6,16 @@ import { FileText, MessageSquare, Send, Loader2, Bot, User } from 'lucide-react'
 import { getSessionId } from '../utils/session';
 
 const CHAT_URL = 'https://namidu.pythonanywhere.com/api/chat/';
+const DOCUMENTS_URL = 'https://namidu.pythonanywhere.com/api/documents/';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+}
+
+interface Document {
+  id: number;
+  title: string;
 }
 
 export default function ChatPage() {
@@ -18,11 +24,27 @@ export default function ChatPage() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [selectedDocId, setSelectedDocId] = useState('all');
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
+
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      try {
+        const res = await fetch(DOCUMENTS_URL, {
+          headers: { 'X-Session-Id': getSessionId() },
+        });
+        const data = await res.json();
+        setDocuments(data);
+      } catch {
+      }
+    };
+    fetchDocuments();
+  }, []);
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
@@ -36,7 +58,9 @@ export default function ChatPage() {
       const res = await fetch(CHAT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Session-Id': getSessionId() },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify(
+          selectedDocId === 'all' ? { question } : { question, document_id: selectedDocId }
+        ),
       });
       const data = await res.json();
       const answer = data.answer ?? data.error ?? 'Something went wrong. Please try again.';
@@ -110,6 +134,26 @@ export default function ChatPage() {
             My Documents
           </Link>
         </header>
+
+        {/* Document selector */}
+        <div className="bg-white border-b border-slate-200 px-8 py-3 flex items-center gap-3">
+          <label htmlFor="doc-select" className="text-sm font-medium text-slate-700">
+            Chat about:
+          </label>
+          <select
+            id="doc-select"
+            value={selectedDocId}
+            onChange={(e) => setSelectedDocId(e.target.value)}
+            className="text-sm text-slate-900 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 px-3 py-1.5"
+          >
+            <option value="all">All Documents</option>
+            {documents.map((doc) => (
+              <option key={doc.id} value={doc.id}>
+                {doc.title}
+              </option>
+            ))}
+          </select>
+        </div>
 
         {/* Chat area */}
         <main className="flex-1 overflow-y-auto px-8 py-6">
