@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { FileText, Upload, Cloud, Eye, Trash2, MessageSquare, Search, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { getSessionId } from './utils/session';
+import AppShell from './components/AppShell';
 
 const API_URL = 'https://namidu.pythonanywhere.com/api/documents/';
 
@@ -96,169 +97,136 @@ export default function Home() {
     new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
   return (
-    <div className="h-screen bg-slate-50 flex overflow-hidden">
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0">
-        <div className="flex items-center gap-2 px-6 py-6">
-          <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center">
-            <MessageSquare className="w-5 h-5 text-white" strokeWidth={2} />
-          </div>
-          <div>
-            <p className="font-semibold text-slate-900 leading-tight">DocQ&A</p>
-            <p className="text-xs text-slate-400 leading-tight">Assistant</p>
-          </div>
+    <AppShell active="documents">
+      <header className="bg-stone-900 border-b border-stone-800 px-4 md:px-8 py-4 md:py-5 flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-6">
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold text-stone-50">Document Q&A Assistant</h1>
+          <p className="text-sm text-stone-400 mt-0.5">Upload your documents and get answers from your content.</p>
         </div>
-
-        <nav className="flex-1 px-3 space-y-1">
-          <Link href="/" className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-50 text-blue-700 font-medium text-sm">
-            <FileText className="w-4 h-4" />
-            Documents
-          </Link>
-          <Link href="/chat" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-500 hover:bg-slate-50 text-sm">
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="relative hidden md:block">
+            <Search className="w-4 h-4 text-stone-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search documents..."
+              className="pl-9 pr-4 py-2 text-sm text-stone-100 placeholder:text-stone-500 rounded-lg border border-stone-700 bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500 w-56"
+            />
+          </div>
+          <Link href="/chat" className="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-stone-950 text-sm font-semibold px-4 py-2 rounded-lg min-h-11 transition-colors">
             <MessageSquare className="w-4 h-4" />
             Chat with Documents
           </Link>
-        </nav>
+        </div>
+      </header>
 
-        <div className="px-4 py-4 border-t border-slate-200 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">
-            NH
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+          <div className="lg:col-span-2 bg-stone-900 rounded-2xl border border-stone-800 shadow-sm shadow-black/20 p-4 md:p-6">
+            <div className="flex items-center gap-2 mb-5">
+              <Cloud className="w-5 h-5 text-amber-500" />
+              <h2 className="font-semibold text-stone-50">Upload New Document</h2>
+            </div>
+
+            <label className="block text-sm font-medium text-stone-300 mb-1.5">Document Title</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => { setTitle(e.target.value); if (titleError) setTitleError(''); }}
+              placeholder="Enter document title..."
+              className={`w-full px-3.5 py-2.5 text-sm text-stone-100 placeholder:text-stone-500 bg-stone-800 rounded-lg border min-h-11 focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                titleError ? 'border-red-500/60' : 'border-stone-700'
+              }`}
+            />
+            {titleError && <p className="text-xs text-red-400 mt-1.5">{titleError}</p>}
+
+            <label className="block text-sm font-medium text-stone-300 mb-1.5 mt-5">Choose File</label>
+            <div
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => { handleDrop(e); if (fileError) setFileError(''); }}
+              className={`border-2 border-dashed rounded-xl py-8 md:py-10 px-4 flex flex-col items-center justify-center text-center transition-colors ${
+                isDragging ? 'border-amber-500 bg-amber-500/10' : fileError ? 'border-red-500/60 bg-red-500/5' : 'border-stone-700 bg-stone-800/50'
+              }`}
+            >
+              <Cloud className="w-7 h-7 text-amber-500 mb-3" />
+              <p className="font-medium text-stone-200 text-sm mb-1">
+                {file ? file.name : 'Drag & drop your file here'}
+              </p>
+              {!file && <p className="text-xs text-stone-500 mb-3">or</p>}
+              <label className="cursor-pointer inline-flex items-center border border-stone-700 bg-stone-900 text-stone-200 text-sm font-medium px-4 py-2 rounded-lg min-h-11 hover:bg-stone-800 transition-colors">
+                Choose File
+                <input
+                  type="file"
+                  accept=".pdf,.docx"
+                  className="hidden"
+                  onChange={(e) => { setFile(e.target.files?.[0] ?? null); if (fileError) setFileError(''); }}
+                />
+              </label>
+              <p className="text-xs text-stone-500 mt-3">Supported formats: PDF, DOCX (Max 20MB)</p>
+            </div>
+            {fileError && <p className="text-xs text-red-400 mt-1.5">{fileError}</p>}
+
+            <button
+              onClick={handleUpload}
+              disabled={status === 'uploading'}
+              className="mt-5 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 disabled:bg-stone-800 disabled:text-stone-500 text-stone-950 text-sm font-semibold px-4 py-2.5 rounded-lg min-h-11 transition-colors"
+            >
+              <Upload className="w-4 h-4" />
+              Upload Document
+            </button>
           </div>
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-slate-900 truncate">Namidu Harshana</p>
-            <p className="text-xs text-slate-400 truncate">namidu@example.com</p>
+
+          <div className="space-y-3">
+            {status === 'uploading' && (
+              <div className="flex gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+                <Loader2 className="w-5 h-5 text-amber-400 animate-spin shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-amber-300">Uploading...</p>
+                  <p className="text-sm text-amber-200">Please wait while your document is being uploaded.</p>
+                </div>
+              </div>
+            )}
+            {status === 'success' && (
+              <div className="flex gap-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
+                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-emerald-300">Success!</p>
+                  <p className="text-sm text-emerald-200">Document uploaded successfully.</p>
+                </div>
+              </div>
+            )}
+            {status === 'error' && (
+              <div className="flex gap-3 bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                <XCircle className="w-5 h-5 text-red-400 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-red-300">Error!</p>
+                  <p className="text-sm text-red-200">Something went wrong. Please try again.</p>
+                </div>
+              </div>
+            )}
+            {status === 'idle' && (
+              <div className="bg-stone-900 border border-stone-800 rounded-xl p-4 text-sm text-stone-500">
+                Upload status will appear here.
+              </div>
+            )}
           </div>
         </div>
-      </aside>
 
-      <div className="flex-1 flex flex-col">
-        <header className="bg-white border-b border-slate-200 px-8 py-5 flex items-center justify-between gap-6">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Document Q&A Assistant</h1>
-            <p className="text-sm text-slate-500 mt-0.5">Upload your documents and get answers from your content.</p>
-          </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="relative hidden md:block">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search documents..."
-                className="pl-9 pr-4 py-2 text-sm text-slate-900 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 w-56"
-              />
-            </div>
-            <Link href="/chat" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-              <MessageSquare className="w-4 h-4" />
-              Chat with Documents
-            </Link>
-          </div>
-        </header>
-
-        <main className="flex-1 overflow-y-auto p-8 space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-              <div className="flex items-center gap-2 mb-5">
-                <Cloud className="w-5 h-5 text-blue-600" />
-                <h2 className="font-semibold text-slate-900">Upload New Document</h2>
-              </div>
-
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Document Title</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => { setTitle(e.target.value); if (titleError) setTitleError(''); }}
-                placeholder="Enter document title..."
-                className={`w-full px-3.5 py-2.5 text-sm text-slate-900 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  titleError ? 'border-red-300' : 'border-slate-200'
-                }`}
-              />
-              {titleError && <p className="text-xs text-red-600 mt-1.5">{titleError}</p>}
-
-              <label className="block text-sm font-medium text-slate-700 mb-1.5 mt-5">Choose File</label>
-              <div
-                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-                onDragLeave={() => setIsDragging(false)}
-                onDrop={(e) => { handleDrop(e); if (fileError) setFileError(''); }}
-                className={`border-2 border-dashed rounded-xl py-10 flex flex-col items-center justify-center text-center transition-colors ${
-                  isDragging ? 'border-blue-500 bg-blue-50' : fileError ? 'border-red-300 bg-red-50/40' : 'border-slate-200 bg-slate-50'
-                }`}
-              >
-                <Cloud className="w-7 h-7 text-blue-500 mb-3" />
-                <p className="font-medium text-slate-700 text-sm mb-1">
-                  {file ? file.name : 'Drag & drop your file here'}
-                </p>
-                {!file && <p className="text-xs text-slate-400 mb-3">or</p>}
-                <label className="cursor-pointer border border-slate-300 bg-white text-sm font-medium px-4 py-1.5 rounded-lg hover:bg-slate-50">
-                  Choose File
-                  <input
-                    type="file"
-                    accept=".pdf,.docx"
-                    className="hidden"
-                    onChange={(e) => { setFile(e.target.files?.[0] ?? null); if (fileError) setFileError(''); }}
-                  />
-                </label>
-                <p className="text-xs text-slate-400 mt-3">Supported formats: PDF, DOCX (Max 20MB)</p>
-              </div>
-              {fileError && <p className="text-xs text-red-600 mt-1.5">{fileError}</p>}
-
-              <button
-                onClick={handleUpload}
-                disabled={status === 'uploading'}
-                className="mt-5 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
-              >
-                <Upload className="w-4 h-4" />
-                Upload Document
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              {status === 'uploading' && (
-                <div className="flex gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4">
-                  <Loader2 className="w-5 h-5 text-blue-600 animate-spin shrink-0" />
-                  <div>
-                    <p className="text-sm font-semibold text-blue-800">Uploading...</p>
-                    <p className="text-sm text-blue-600">Please wait while your document is being uploaded.</p>
-                  </div>
-                </div>
-              )}
-              {status === 'success' && (
-                <div className="flex gap-3 bg-green-50 border border-green-100 rounded-xl p-4">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
-                  <div>
-                    <p className="text-sm font-semibold text-green-800">Success!</p>
-                    <p className="text-sm text-green-600">Document uploaded successfully.</p>
-                  </div>
-                </div>
-              )}
-              {status === 'error' && (
-                <div className="flex gap-3 bg-red-50 border border-red-100 rounded-xl p-4">
-                  <XCircle className="w-5 h-5 text-red-600 shrink-0" />
-                  <div>
-                    <p className="text-sm font-semibold text-red-800">Error!</p>
-                    <p className="text-sm text-red-600">Something went wrong. Please try again.</p>
-                  </div>
-                </div>
-              )}
-              {status === 'idle' && (
-                <div className="bg-white border border-slate-200 rounded-xl p-4 text-sm text-slate-400">
-                  Upload status will appear here.
-                </div>
-              )}
-            </div>
+        <div className="bg-stone-900 rounded-2xl border border-stone-800 shadow-sm shadow-black/20 overflow-hidden">
+          <div className="flex items-center gap-2 px-4 md:px-6 py-4 border-b border-stone-800">
+            <FileText className="w-5 h-5 text-amber-500" />
+            <h2 className="font-semibold text-stone-50">Your Documents</h2>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="flex items-center gap-2 px-6 py-4 border-b border-slate-200">
-              <FileText className="w-5 h-5 text-blue-600" />
-              <h2 className="font-semibold text-slate-900">Your Documents</h2>
+          {documents.length === 0 ? (
+            <div className="py-14 px-4 text-center text-sm text-stone-500">
+              No documents yet, upload your first one above.
             </div>
-
-            {documents.length === 0 ? (
-              <div className="py-14 text-center text-sm text-slate-400">
-                No documents yet, upload your first one above.
-              </div>
-            ) : (
-              <table className="w-full text-sm">
+          ) : (
+            <>
+              <table className="hidden md:table w-full text-sm">
                 <thead>
-                  <tr className="text-left text-slate-400 border-b border-slate-100">
+                  <tr className="text-left text-stone-500 border-b border-stone-800">
                     <th className="font-medium py-3 px-6">Title</th>
                     <th className="font-medium py-3 px-4">Upload Date</th>
                     <th className="font-medium py-3 px-4">Type</th>
@@ -267,33 +235,33 @@ export default function Home() {
                 </thead>
                 <tbody>
                   {documents.map((doc) => (
-                    <tr key={doc.id} className="border-b border-slate-50 last:border-0">
+                    <tr key={doc.id} className="border-b border-stone-800/60 last:border-0 hover:bg-stone-800/40 transition-colors">
                       <td className="py-3.5 px-6">
                         <div className="flex items-center gap-3">
-                          <span className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold shrink-0">
+                          <span className="w-9 h-9 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-[10px] font-bold shrink-0">
                             {fileType(doc.file)}
                           </span>
-                          <span className="font-medium text-slate-800">{doc.title}</span>
+                          <span className="font-medium text-stone-100">{doc.title}</span>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 text-slate-500">
-                        {formatDate(doc.uploaded_at)} <span className="text-slate-300">.</span> {formatTime(doc.uploaded_at)}
+                      <td className="py-3.5 px-4 text-stone-400">
+                        {formatDate(doc.uploaded_at)} <span className="text-stone-600">.</span> {formatTime(doc.uploaded_at)}
                       </td>
-                      <td className="py-3.5 px-4 text-slate-500">{fileType(doc.file)}</td>
+                      <td className="py-3.5 px-4 text-stone-400">{fileType(doc.file)}</td>
                       <td className="py-3.5 px-6">
                         <div className="flex items-center justify-end gap-2">
                           <a
                             href={doc.file}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 text-blue-600 border border-blue-200 hover:bg-blue-50 text-xs font-medium px-3 py-1.5 rounded-lg"
+                            className="flex items-center gap-1.5 text-amber-400 border border-amber-500/30 hover:bg-amber-500/10 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
                           >
                             <Eye className="w-3.5 h-3.5" />
                             View
                           </a>
                           <button
                             onClick={() => handleDelete(doc.id)}
-                            className="flex items-center gap-1.5 text-red-600 border border-red-200 hover:bg-red-50 text-xs font-medium px-3 py-1.5 rounded-lg"
+                            className="flex items-center gap-1.5 text-red-400 border border-red-500/30 hover:bg-red-500/10 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                             Delete
@@ -304,10 +272,46 @@ export default function Home() {
                   ))}
                 </tbody>
               </table>
-            )}
-          </div>
-        </main>
-      </div>
-    </div>
+
+              <div className="md:hidden divide-y divide-stone-800">
+                {documents.map((doc) => (
+                  <div key={doc.id} className="p-4 flex flex-col gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-[10px] font-bold shrink-0">
+                        {fileType(doc.file)}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-stone-100 truncate">{doc.title}</p>
+                        <p className="text-xs text-stone-400 mt-0.5">
+                          {formatDate(doc.uploaded_at)} <span className="text-stone-600">.</span> {formatTime(doc.uploaded_at)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={doc.file}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 flex items-center justify-center gap-1.5 text-amber-400 border border-amber-500/30 hover:bg-amber-500/10 text-sm font-medium px-3 rounded-lg min-h-11 transition-colors"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View
+                      </a>
+                      <button
+                        onClick={() => handleDelete(doc.id)}
+                        className="flex-1 flex items-center justify-center gap-1.5 text-red-400 border border-red-500/30 hover:bg-red-500/10 text-sm font-medium px-3 rounded-lg min-h-11 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </main>
+    </AppShell>
   );
 }
