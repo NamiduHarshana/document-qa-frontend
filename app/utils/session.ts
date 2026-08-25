@@ -10,3 +10,10 @@ export function getSessionId(): string {
 
   return sessionId;
 }
+
+const CLEAR_SESSION_URL = 'https://namidu.pythonanywhere.com/api/documents/clear-session/';
+
+export function clearSessionDocuments(): void {
+  if (typeof navigator === 'undefined' || !navigator.sendBeacon) return;
+  navigator.sendBeacon(CLEAR_SESSION_URL, new URLSearchParams({ session_id: getSessionId() }));
+}
