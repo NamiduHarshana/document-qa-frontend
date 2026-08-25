@@ -26,7 +26,6 @@ export default function Home() {
   const [isDragging, setIsDragging] = useState(false);
   const [titleError, setTitleError] = useState('');
   const [fileError, setFileError] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchDocuments = useCallback(async () => {
     try {
@@ -89,10 +88,6 @@ export default function Home() {
     if (dropped) setFile(dropped);
   };
 
-  const filteredDocuments = documents.filter((doc) =>
-    doc.title.toLowerCase().includes(searchQuery.trim().toLowerCase())
-  );
-
   const fileType = (filename: string) => filename.split('.').pop()?.toUpperCase() ?? 'FILE';
 
   const formatDate = (iso: string) =>
@@ -113,8 +108,6 @@ export default function Home() {
             <Search className="w-4 h-4 text-stone-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search documents..."
               className="pl-9 pr-4 py-2 text-sm text-stone-100 placeholder:text-stone-500 rounded-lg border border-stone-700 bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500 w-56"
             />
@@ -225,11 +218,9 @@ export default function Home() {
             <h2 className="font-semibold text-stone-50">Your Documents</h2>
           </div>
 
-          {filteredDocuments.length === 0 ? (
+          {documents.length === 0 ? (
             <div className="py-14 px-4 text-center text-sm text-stone-500">
-              {documents.length === 0
-                ? 'No documents yet, upload your first one above.'
-                : 'No documents match your search.'}
+              No documents yet, upload your first one above.
             </div>
           ) : (
             <>
@@ -243,7 +234,7 @@ export default function Home() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredDocuments.map((doc) => (
+                  {documents.map((doc) => (
                     <tr key={doc.id} className="border-b border-stone-800/60 last:border-0 hover:bg-stone-800/40 transition-colors">
                       <td className="py-3.5 px-6">
                         <div className="flex items-center gap-3">
@@ -283,7 +274,7 @@ export default function Home() {
               </table>
 
               <div className="md:hidden divide-y divide-stone-800">
-                {filteredDocuments.map((doc) => (
+                {documents.map((doc) => (
                   <div key={doc.id} className="p-4 flex flex-col gap-3">
                     <div className="flex items-center gap-3">
                       <span className="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-[10px] font-bold shrink-0">
