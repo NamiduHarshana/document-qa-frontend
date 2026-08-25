@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { FileText, Upload, Cloud, Eye, Trash2, MessageSquare, Search, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { FileText, Upload, Cloud, Eye, Trash2, MessageSquare, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { getSessionId } from './utils/session';
 import AppShell from './components/AppShell';
 
@@ -103,20 +103,10 @@ export default function Home() {
           <h1 className="text-xl md:text-2xl font-bold text-stone-50">Document Q&A Assistant</h1>
           <p className="text-sm text-stone-400 mt-0.5">Upload your documents and get answers from your content.</p>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="relative hidden md:block">
-            <Search className="w-4 h-4 text-stone-500 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search documents..."
-              className="pl-9 pr-4 py-2 text-sm text-stone-100 placeholder:text-stone-500 rounded-lg border border-stone-700 bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500 w-56"
-            />
-          </div>
-          <Link href="/chat" className="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-stone-950 text-sm font-semibold px-4 py-2 rounded-lg min-h-11 transition-colors">
-            <MessageSquare className="w-4 h-4" />
-            Chat with Documents
-          </Link>
-        </div>
+        <Link href="/chat" className="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-stone-950 text-sm font-semibold px-4 py-2 rounded-lg min-h-11 transition-colors shrink-0">
+          <MessageSquare className="w-4 h-4" />
+          Chat with Documents
+        </Link>
       </header>
 
       <main className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
